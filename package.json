@@ -1,0 +1,9 @@
+{
+  "name": "incremint-partner-studio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node serve.mjs",
+    "test": "node verify.mjs"
+  }
+}
