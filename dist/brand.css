@@ -1,4 +1,5 @@
 /* Sigma0Nine: navy foundations, electric-blue momentum. */
+.sidebar>.brand,.sidebar>.workspace,.sidebar>.nav,.sidebar>.sidebarbottom{flex-shrink:0}
 :root{--navy:#071c48;--navy-light:#10356b;--blue:#0783f9;--blue-dark:#0567d5;--ink:#12294e;--muted:#657b97;--line:#e4ecf7;--surface:#f3f7fd;color:var(--ink);background:var(--surface);font-size:16px}
 body{background:radial-gradient(ellipse at 95% 0%,#e7f0ff 0,transparent 40%),var(--surface)}
 button{border-color:var(--line);border-radius:10px;color:var(--ink);transition:background .18s,box-shadow .18s,transform .18s}
