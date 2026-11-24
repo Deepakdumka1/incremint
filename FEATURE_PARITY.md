@@ -4,6 +4,8 @@ Reference: https://incremint-dashboard.web.app/ — inspected while signed in on
 
 This is **partial functional parity, not a complete or exact production clone**. The reference account had no bookings, leads, contacts, prospects or network members, so populated row actions, server validation, approval decisions and actual payout behavior could not be verified. No lead, policy, invitation, trial, subscription or payment was submitted in the reference application.
 
+**Subsequent Phase 1 scope:** a separate authenticated policy-upload → admin review → partner credit portal has now been implemented for Sigma0Nine. It uses its own Supabase database and private storage, rather than the original backend. See [PHASE1_SETUP.md](PHASE1_SETUP.md). Its live activation is pending the new project connection; the original audit below remains a record of the reference comparison.
+
 ## Implemented on this device
 
 | Reference area | Observed behavior | Sigma0Nine implementation |
