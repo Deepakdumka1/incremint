@@ -16,6 +16,8 @@ Credits represent points and earning balances in this application. This phase do
 
 ## Go live
 
+The Sigma0Nine production project has now been created and its initial SQL migration applied. Its browser-safe URL and publishable key are in `config/public-project.mjs`; no secret key is needed by this app. Environment variables remain supported as a complete override for other deployments. If any Supabase environment variable is provided, both the URL and public key must be valid; the app will not silently mix projects.
+
 ### 1. Create your own Supabase project
 
 Use a dedicated project named **Sigma0Nine**. A shared database and private object storage are required; browser storage cannot sync different users/devices. The project owner completes provider sign-in, account terms and any billing choices.
