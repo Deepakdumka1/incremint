@@ -2,4 +2,17 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import config from '../api/config.mjs';
 function response(){return {code:200,body:null,setHeader(){},status(code){this.code=code;return this},json(body){this.body=body;return this}}}
+test('production defaults connect one project; partial environment overrides fail closed',()=>{
+  const names=['SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','SUPABASE_ANON_KEY'];
+  const saved=Object.fromEntries(names.map(name=>[name,process.env[name]]));
+  try{
+    for(const name of names)delete process.env[name];
+    let res=response();config({method:'GET'},res);
+    assert.equal(res.body.configured,true);
+    assert.equal(res.body.url,'https://tdnywfoljybghrnltsoq.supabase.co');
+    assert.match(res.body.publishableKey,/^sb_publishable_/);
+    process.env.SUPABASE_URL='https://another-project.supabase.co';
+    res=response();config({method:'GET'},res);assert.deepEqual(res.body,{configured:false});
+  }finally{for(const name of names){if(saved[name]===undefined)delete process.env[name];else process.env[name]=saved[name]}}
+});
 test('client configuration never exposes a secret/service role key',()=>{let oldUrl=process.env.SUPABASE_URL,oldKey=process.env.SUPABASE_PUBLISHABLE_KEY,oldAnon=process.env.SUPABASE_ANON_KEY;try{process.env.SUPABASE_URL='https://test-project.supabase.co';delete process.env.SUPABASE_ANON_KEY;for(const value of ['sb_secret_sensitive','x.'+Buffer.from(JSON.stringify({role:'service_role'})).toString('base64url')+'.x','placeholder']){process.env.SUPABASE_PUBLISHABLE_KEY=value;let res=response();config({method:'GET'},res);assert.deepEqual(res.body,{configured:false})}process.env.SUPABASE_PUBLISHABLE_KEY='sb_publishable_test_public';let res=response();config({method:'GET'},res);assert.equal(res.body.configured,true);assert.equal(res.body.publishableKey,'sb_publishable_test_public');let post=response();config({method:'POST'},post);assert.equal(post.code,405)}finally{for(const [k,v] of [['SUPABASE_URL',oldUrl],['SUPABASE_PUBLISHABLE_KEY',oldKey],['SUPABASE_ANON_KEY',oldAnon]]){if(v===undefined)delete process.env[k];else process.env[k]=v}}});
