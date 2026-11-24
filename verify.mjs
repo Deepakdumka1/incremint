@@ -11,6 +11,7 @@ run("go('bookings')");assert.ok(node('#app').classList.contains('sidebar-collaps
 run('toggleSidebar()');assert.ok(!node('#app').classList.contains('sidebar-collapsed'));
 ctx.matchMedia=()=>({matches:true});run('toggleSidebar()');assert.ok(node('.sidebar').classList.contains('open'));run('toggleSidebar()');assert.ok(!node('.sidebar').classList.contains('open'));ctx.matchMedia=()=>({matches:false});
 for(const p of ['dashboard','sell','marketing','assistant','bookings','statement','renewals','rates','leads','network','prospects','contacts','help','quotes']){run(`go('${p}')`);const html=node('#app').innerHTML;assert.ok(html.length>1500,p);for(const match of html.matchAll(/(?:onclick|onchange|oninput|onsubmit)="([^"]*)"/g)){const js=match[1].replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');new vm.Script(`(function(event){${js}})`)} }
+run("go('dashboard')");assert.ok(node('#app').innerHTML.includes('sigma0nine-logo.png'));assert.ok(node('#app').innerHTML.includes('goal-ring'));assert.ok(!node('#app').innerHTML.includes('Incremint'));assert.ok(readFileSync('dist/brand.css','utf8').includes('@media(max-width:600px)'));assert.ok(readFileSync('dist/sigma0nine-logo.png').length>0);
 run("moveLead('L1','Booked')");assert.equal(run("db.leads.find(l=>l.id==='L1').status"),'Booked');
 run("renewPolicy('INC-2047')");assert.equal(run("db.bookings.find(b=>b.id==='INC-2047').renewed"),true);
 run("issue('INC-2046')");assert.equal(run("db.bookings.find(b=>b.id==='INC-2046').status"),'Issued');

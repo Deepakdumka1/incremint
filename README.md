@@ -1,6 +1,6 @@
-# Incremint Partner Studio
+# Sigma0Nine Partner Studio
 
-A responsive monochrome insurance partner dashboard inspired by the supplied screenshots.
+A responsive insurance partner dashboard branded with the supplied Sigma0Nine logo, navy and electric blue. Includes a welcome banner, performance chart, monthly milestone ring, product shortcuts and an assistant entry point. Existing browser records retain their original storage keys for continuity.
 
 Run `node serve.mjs` and open http://127.0.0.1:4173. No dependencies or build step.
 
