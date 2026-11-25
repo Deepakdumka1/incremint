@@ -8,6 +8,8 @@ This is **partial functional parity, not a complete or exact production clone**.
 
 ## Implemented on this device
 
+**25 November update:** full business navigation is now available inside the authenticated partner shell. Business records and draft/quote metadata are account-owned cloud data, attachments use private cloud storage, and My bookings/My statement/My renewals read the live policy/credit records. Refer & Earn has a 12-product catalogue and client-configurable external links. AI/WhatsApp automation, bank payouts, insurer issuance and original Incremint backend parity remain outside the connected implementation; their absence is shown in Connections.
+
 | Reference area | Observed behavior | Sigma0Nine implementation |
 | --- | --- | --- |
 | Dashboard | Volume, lead points, received/pending points, product shortcuts, leads, referral, trend, product mix, current/next-month renewals | Metrics now derive from workspace records; no invented growth or earnings in the new dashboard. New workspaces start empty. Existing local data is preserved. |

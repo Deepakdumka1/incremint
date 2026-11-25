@@ -22,6 +22,8 @@ Credits represent points and earning balances in this application. This phase do
 
 ## Go live
 
+The follow-up `supabase/migrations/202611250002_workspace.sql` is applied to production. It restores the authenticated business tools with account-owned records/private files and adds administrator-managed shared referral links. Apply both migrations in order when creating a new environment. Workspace drafts are limited to 2 MB of JSON and files to 10 MB. Concurrent saves fail with a visible conflict instead of overwriting another tab; unsaved work can be downloaded as a backup.
+
 The Sigma0Nine production project has now been created and its initial SQL migration applied. Its browser-safe URL and publishable key are in `config/public-project.mjs`; no secret key is needed by this app. Environment variables remain supported as a complete override for other deployments. If any Supabase environment variable is provided, both the URL and public key must be valid; the app will not silently mix projects.
 
 ### 1. Create your own Supabase project

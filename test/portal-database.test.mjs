@@ -16,6 +16,8 @@ before(async()=>{
     create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text,metadata jsonb default '{}');
     alter table storage.objects enable row level security;grant select,insert,delete on storage.objects to authenticated;`);
   await db.exec(readFileSync('supabase/migrations/202611240001_phase1.sql','utf8'));
+  await db.exec(`create function storage.foldername(name text) returns text[] language sql immutable as $$ select string_to_array(name,'/') $$;`);
+  await db.exec(readFileSync('supabase/migrations/202611250002_workspace.sql','utf8'));
   await db.query(`insert into auth.users(id,email,raw_user_meta_data) values($1,'partner-a@example.test','{"full_name":"Partner A","role":"admin"}'),($2,'partner-b@example.test','{"full_name":"Partner B"}'),($3,'admin@example.test','{"full_name":"Admin"}')`,[partnerA,partnerB,admin]);
   await db.query('update sigma_profiles set role=\'admin\' where id=$1',[admin]);
 });
@@ -69,3 +71,20 @@ test('rejected policies retain their reason, stay private and cannot receive cre
   await user(partnerA,async()=>{assert.equal((await db.query('select * from sigma_policies where id=$1',[policyB])).rows.length,0);await assert.rejects(db.query("insert into sigma_audit(actor_id,policy_id,action) values($1,$2,'Approved')",[partnerA,policyA]))});
 });
 test('unauthenticated access is denied',async()=>{await db.exec('set role anon');try{await assert.rejects(db.query('select * from sigma_policies'));await assert.rejects(db.query('select sigma_portal_summary()'))}finally{await db.exec('reset role')}});
+
+test('business workspaces are owner-only and reject stale writes',async()=>{
+ await user(partnerA,async()=>{let saved=(await db.query("select * from sigma_save_workspace($1,1)",[{db:{contacts:[{name:'Private contact'}]}}])).rows[0];assert.equal(Number(saved.version),2);await assert.rejects(db.query("select sigma_save_workspace('{}',1)"));await assert.rejects(db.query("update sigma_workspaces set data='{}'"));});
+ await user(partnerB,async()=>assert.equal((await db.query('select * from sigma_workspaces')).rows.length,0));
+ await user(admin,async()=>assert.equal((await db.query('select * from sigma_workspaces')).rows.length,0));
+});
+test('only admins set shared referral links; unsafe and stale links fail',async()=>{
+ await failAs(partnerA,'select sigma_save_referral_settings($1,1)',[{links:{term:'https://example.test/term'}}]);
+ await user(admin,async()=>{let row=(await db.query('select * from sigma_save_referral_settings($1,1)',[{links:{term:'https://example.test/term'},supportPhone:'+91 9000000000'}])).rows[0];assert.equal(Number(row.version),2);await assert.rejects(db.query('select sigma_save_referral_settings($1,2)',[{links:{term:'javascript:alert(1)'}}]));await assert.rejects(db.query('select sigma_save_referral_settings($1,1)',[{links:{}}]));});
+ await user(partnerB,async()=>assert.equal((await db.query('select data from sigma_referral_settings')).rows[0].data.links.term,'https://example.test/term'));
+});
+test('business documents cannot be uploaded to or read from another account',async()=>{
+ await user(partnerA,()=>db.query("insert into storage.objects(bucket_id,name) values('sigma-workspace-files',$1)",[partnerA+'/asset/art.png']));
+ await failAs(partnerB,"insert into storage.objects(bucket_id,name) values('sigma-workspace-files',$1)",[partnerA+'/asset/other.png']);
+ await user(partnerB,async()=>assert.equal((await db.query("select * from storage.objects where bucket_id='sigma-workspace-files'")).rows.length,0));
+ await user(partnerA,async()=>assert.equal((await db.query("select * from storage.objects where bucket_id='sigma-workspace-files'")).rows.length,1));
+});

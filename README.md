@@ -8,6 +8,10 @@ Run `npm ci`, `npm run build`, then `npm start` and open http://127.0.0.1:4173.
 
 Run `npm test` for functional, SQL security, credit-ledger and portal checks.
 
+The authenticated partner sidebar now includes the full business workspace: dashboard, Refer & Earn, marketing, assistant preferences/draft previews, bookings, statement, renewals, rates, leads, network, prospects, contacts, quote tools, help and settings. Business records/drafts use `sigma_workspaces` with owner-only access and optimistic concurrency; associated files use private `sigma-workspace-files`. Policy status and earned points remain exclusively in the reviewed policy/immutable ledger tables, never in editable workspace JSON.
+
+Refer & Earn mirrors the reference catalogue flow with 12 categories, internal product detail pages, insurer quote resources, demat and support/resource destinations. All external URLs start empty and are supplied by the client through **Admin → Manage referral links**. Pending links are visibly inactive. No original agent tokens, credentials or referral codes are copied. Admins get a dedicated **Give points / earnings** queue, direct approved-row credit buttons, and the credit form opens after approval without automatically issuing a credit.
+
 Vercel deploys the static files in `dist/`, as configured in `vercel.json`. Import the repository with the repository root as Root Directory. Git pushes to `main` trigger a new production deployment when the Vercel Git integration is enabled.
 
 Includes dedicated product lead workflows, draft persistence, locally stored documents, pending policy requests, six-stage lead pipeline, contacts and prospects, renewal filters, imported payout statements, rate comparisons and earnings calculations, Health/Niva quote documents, CSV/XLSX exports, printable reports, licensed media personalisation, advisor-page HTML export, profile settings and backup/restore.

@@ -6,7 +6,7 @@ const nodes=new Map();
 const node=selector=>{if(!nodes.has(selector))nodes.set(selector,{innerHTML:'',textContent:'',classList:{toggle(){},add(){},remove(){}},focus(){},insertAdjacentHTML(){}});return nodes.get(selector)};
 const context={console,URL,Blob,TextEncoder,structuredClone,FormData,location:{hash:'#policyportal',origin:'https://example.test'},history:{replaceState(){}},matchMedia:()=>({matches:false}),setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,clearInterval(){},localStorage:{getItem(){return null},setItem(){},removeItem(){}},document:{querySelector:node,querySelectorAll:()=>[],addEventListener(){},title:''}};
 context.window=context;context.addEventListener=()=>{};context.scrollTo=()=>{};vm.createContext(context);
-for(const file of ['app.js','workflows.js','parity.js','operations.js','quote-tools.js','excel-export.js','workspace-tools.js','portal-core.js','portal.js'])vm.runInContext(readFileSync('dist/'+file,'utf8'),context);
+for(const file of ['app.js','workflows.js','parity.js','operations.js','quote-tools.js','excel-export.js','workspace-tools.js','portal-core.js','portal.js','portal-workspace.js'])vm.runInContext(readFileSync('dist/'+file,'utf8'),context);
 const run=s=>vm.runInContext(s,context);
 const id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',owner='11111111-1111-4111-8111-111111111111';
 function compileHandlers(html){for(const m of html.matchAll(/(?:onclick|onchange|oninput|onsubmit)="([^"]*)"/g)){const text=m[1].replaceAll('&quot;','"').replaceAll('&#39;',"'").replaceAll('&amp;','&').replaceAll('&lt;','<').replaceAll('&gt;','>');new vm.Script(`(function(event){${text}})`)}}
@@ -17,3 +17,31 @@ test('admin workflow shows uploader identity, approval, then credit only after a
 test('a retried interrupted upload reuses the same policy record',async()=>{let inserts=0,uploads=0,hasRecord=false,hasFile=false;context.mock={from(){return {select(){return {eq(){return {maybeSingle:async()=>({data:hasRecord?{id}:null,error:null})}}}},insert:async()=>{inserts++;hasRecord=true;return {error:null}}}},rpc:async()=>hasFile?{data:{},error:null}:{error:{message:'Upload the policy document before submitting'}},storage:{from(){return {upload:async()=>{uploads++;hasFile=true;return {error:null}}}}}};run('portal.client=mock');const attempt={record:{id,storage_path:owner+'/'+id+'/policy.pdf'},file:{type:'application/pdf'}};context.attempt=attempt;context.progress={textContent:''};await run('portalCompleteUpload(attempt,progress)');await run('portalCompleteUpload(attempt,progress)');assert.equal(inserts,1);assert.equal(uploads,1)});
 
 test('opening the other workspace does not silently render its dashboard',()=>{run("portalEntry.role='admin';portal.profile.role='partner';portalRender()");let html=node('#app').innerHTML;assert.match(html,/This page requires a admin account/);assert.doesNotMatch(html,/Review policies/);run("portalEntry.role='partner';portal.profile.role='admin';portalRender()");html=node('#app').innerHTML;assert.match(html,/This page requires a partner account/);assert.doesNotMatch(html,/Admin overview/)});
+
+test('full authenticated partner navigation renders every business section',()=>{
+ run("portalEntry.role='partner';portal.profile.role='partner';business.ready=true;business.owner=portal.user.id;businessApply({});portalMirrorPolicies()");
+ const pages=['home','refer','marketing','assistant','policies','wallet','renewals','rates','leads','network','prospects','contacts','quotes','nivaquote','savedquotes','help','settings','integrations'];
+ for(const page of pages){run("portal.view="+JSON.stringify(page)+";portalRender()");const html=node('#app').innerHTML;assert.match(html,/Refer & Earn/);assert.match(html,/My contacts/);assert.match(html,/My renewals/);compileHandlers(html)}
+});
+test('referral catalogue has all twelve categories, internal detail pages and safe client destinations',()=>{
+ run("portal.view='refer';business.referral={links:{}};portalRender()");let html=node('#app').innerHTML;assert.match(html,/Commercial Vehicle/);assert.match(html,/Group Personal Accident/);assert.match(html,/Motor quote portal/);assert.match(html,/Link pending/);assert.doesNotMatch(html,/href=\"javascript:/);
+ run("portal.view='refer-term';business.referral={links:{term:'https://client.example/term','term-quote':'javascript:bad()'}};portalRender()");html=node('#app').innerHTML;assert.match(html,/https:\/\/client.example\/term/);assert.match(html,/noopener noreferrer/);assert.doesNotMatch(html,/javascript:bad/);compileHandlers(html);
+});
+test('admin sees direct credit actions and a dedicated uncredited queue',()=>{
+ run("portalEntry.role='admin';portal.profile.role='admin';portal.policies[0].status='Approved';portal.policies[0].sigma_ledger=[];portal.view='policies';portalRender()");let html=node('#app').innerHTML;assert.match(html,/Give points \/ earnings/);assert.match(html,/portalCreditForm/);
+ run("portal.view='uncredited';portalRender()");html=node('#app').innerHTML;assert.match(html,/partner@example.test/);assert.match(html,/APPROVED · NOT CREDITED/);compileHandlers(html);
+ run("portal.view='referral-settings';portalRender()");html=node('#app').innerHTML;assert.match(html,/Save client links/);assert.match(html,/link-term-quote/);compileHandlers(html);
+});
+
+test('approval opens the partner credit form without issuing a credit automatically',async()=>{
+ const priorFormData=context.FormData;context.FormData=class{get(){return 'Reviewed'}};
+ context.reviewCalls=[];context.reviewForm={querySelector(){return {disabled:false,textContent:''}}};
+ context.reviewClient={rpc:async(name,args)=>{context.reviewCalls.push({name,args});return {data:{},error:null}}};
+ run("portalEntry.role='admin';portal.profile.role='admin';portal.busy=false;portal.client=reviewClient;portal.policies[0].status='Pending';portal.policies[0].sigma_ledger=[];var savedPortalRefresh=portalRefresh;portalRefresh=async()=>{portal.policies[0].status='Approved'}");
+ try{await run("portalReviewSubmit('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','Approved',reviewForm)");assert.match(node('#overlay').innerHTML,/Credit partner account/);assert.match(node('#overlay').innerHTML,/partner@example.test/);assert.equal(context.reviewCalls.length,1);assert.equal(context.reviewCalls[0].name,'sigma_review_policy')}finally{context.FormData=priorFormData;run('portalRefresh=savedPortalRefresh')}
+});
+test('business saves cannot inject browser bookings into the authoritative wallet',async()=>{
+ context.savedBusinessPayload=null;context.businessClient={rpc:async(name,args)=>{context.savedBusinessPayload=args;return {data:{version:2},error:null}}};
+ run("portal.client=businessClient;business.owner=portal.user.id;business.ready=true;business.dirty=false;business.version=1;business.saving=false;db.leads=[{name:'A customer'}];db.bookings=[{points:999999}];portalSaveBusiness()");
+ await run('portalFlushBusiness()');assert.equal(context.savedBusinessPayload.p_version,1);assert.equal(context.savedBusinessPayload.p_data.db.bookings,undefined);assert.equal(context.savedBusinessPayload.p_data.db.leads[0].name,'A customer');assert.equal(run('business.dirty'),false);
+});
