@@ -4,6 +4,12 @@ The implementation uses Supabase Auth, PostgreSQL row-level security and private
 
 ## Implemented flow
 
+Admin entry: `https://incremint-sigma.vercel.app/admin#admin-policies`
+
+Partner entry: `https://incremint-sigma.vercel.app/partner#mypolicies`
+
+These entries use separate authentication storage keys, so two different accounts can stay signed in side by side. Legacy `/#admin...` links redirect to `/admin`; other legacy entries redirect to `/partner`, retaining the existing partner session. A role mismatch shows an access message instead of silently rendering the other dashboard. Sign-out affects only the current session. Email sign-in links are also supported; they verify the email and return to the workspace that requested the link. Admin rights still come only from the trusted database role.
+
 1. A partner signs up with a name, email and password, confirms their email, then signs in.
 2. The partner uploads a PDF/JPG/PNG/WebP policy, customer details and optional insurer/policy/premium/date details.
 3. The private document is uploaded first. Only then does the policy enter the admin’s **Pending** queue. Interrupted uploads remain recoverable under **Upload incomplete**.

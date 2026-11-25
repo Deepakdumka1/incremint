@@ -8,5 +8,9 @@
   function validateCredit(p,amountValue){const pValue=points(p),amountPaise=paise(amountValue);if(pValue===0&&amountPaise===0)throw Error('Enter points or an earning amount greater than zero');return {points:pValue,amount_paise:amountPaise}}
   function fileExtension(type){const ext={'application/pdf':'pdf','image/png':'png','image/jpeg':'jpg','image/webp':'webp'}[type];if(!ext)throw Error('Upload a PDF, JPG, PNG or WebP file');return ext}
   async function validateFile(file){if(!file||!file.size)throw Error('Choose a policy document');if(file.size>10485760)throw Error('Policy copy must be 10 MB or smaller');const ext=fileExtension(file.type),bytes=new Uint8Array(await file.slice(0,16).arrayBuffer());const text=String.fromCharCode(...bytes);const valid=ext==='pdf'?text.startsWith('%PDF-'):ext==='png'?bytes[0]===137&&text.slice(1,4)==='PNG':ext==='jpg'?bytes[0]===255&&bytes[1]===216&&bytes[2]===255:text.startsWith('RIFF')&&text.slice(8,12)==='WEBP';if(!valid)throw Error('The file contents do not match its declared format');return ext}
-  root.PortalCore={paise,points,money,phone,uuid,validateCredit,fileExtension,validateFile};
+  function workspace(path='/',hash=''){
+    const admin=/^\/admin\/?$/.test(path)||!/^\/partner\/?$/.test(path)&&/^#admin(?:-|$)/.test(hash);
+    return {role:admin?'admin':'partner',path:admin?'/admin':'/partner',storageKey:admin?'sigma-auth-admin-v1':'sigma-auth-v1'};
+  }
+  root.PortalCore={paise,points,money,phone,uuid,validateCredit,fileExtension,validateFile,workspace};
 })(globalThis);
