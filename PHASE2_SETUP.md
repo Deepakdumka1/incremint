@@ -22,3 +22,9 @@ Receipts require a prior positive earning credit. Row locks and unique ledger co
 ## Validation
 
 49 tests passed before the final catalogue cleanup. `npm test` covers invitation authorization, fixed redirects, honest send failures, amount-only credits, receipt ownership, file metadata, retry safety, private storage, navigation removals and all prior policy autofill/security checks. Test documents and QA pages stay in ignored folders. No customer policy files or payment proof samples are committed.
+
+## Admin-assisted policy uploads
+
+Migration `202611270004_admin_policy_upload.sql` was applied on 27 November 2026. Admin overview and Review policies offer **Upload for partner**. The administrator searches existing partner accounts and chooses the policy owner before selecting a file. Autofill remains enabled and the selected name/email stays visible. The storage path and policy owner use the partner ID; the new `uploaded_by` field defaults to the authenticated uploader and cannot be forged by client inserts. Submission audit records retain both owner and actor. Policies still go through Pending, approval and an amount award; the earning ledger continues to use the partner owner, not the administrator uploader. Incomplete uploads can be resumed by an administrator.
+
+Ordinary public admin and partner login screens contain no signup, account-creation or invitation-code entry buttons. Public signup remains disabled at the Auth provider. Existing invitation verification links continue to work; code verification is reachable only through a dedicated invitation URL. No admin account was created by this change.
