@@ -17,8 +17,8 @@ function setup(){
 test('autofill preserves existing and newly edited entries and requires review',async()=>{
   const s=setup();s.fields.customerName.value='Manual name';const run=await s.start();
   assert.equal(s.nodes['button[type=submit]'].disabled,true);
-  s.fields.policyNumber.value='TYPED-123';run.resolve({text:JSON.stringify({customerName:'Detected name',policyNumber:'PDF-123',premium:'1250.50'}),ocrPages:0});await run.promise;
-  assert.equal(s.fields.customerName.value,'Manual name');assert.equal(s.fields.policyNumber.value,'TYPED-123');assert.equal(s.fields.premium.value,'1250.50');assert.equal(s.fields.extractionChecked.required,true);assert.equal(s.nodes['button[type=submit]'].disabled,false);
+  s.fields.policyNumber.value='TYPED-123';run.resolve({text:JSON.stringify({customerName:'Detected name',customerMobile:'9876543210',policyNumber:'PDF-123',premium:'1250.50'}),ocrPages:0});await run.promise;
+  assert.equal(s.fields.customerName.value,'Manual name');assert.equal(s.fields.customerMobile.value,'');assert.equal(s.fields.policyNumber.value,'TYPED-123');assert.equal(s.fields.premium.value,'1250.50');assert.equal(s.fields.extractionChecked.required,true);assert.equal(s.nodes['button[type=submit]'].disabled,false);
 });
 test('replacement files and stopping cannot apply stale extraction results',async()=>{
   const s=setup(),old=await s.start(),latest=await s.start();
