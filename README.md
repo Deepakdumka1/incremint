@@ -2,6 +2,8 @@
 
 A responsive insurance partner dashboard branded with the supplied Sigma0Nine logo, navy and electric blue. Includes a welcome banner, performance chart, monthly milestone ring, product shortcuts and an assistant entry point. Existing browser records retain their original storage keys for continuity.
 
+**Current operations:** invitation-only partner onboarding, amount-only earning awards and UTR/private payment receipts are implemented. Public self-registration is disabled. See [PHASE2_SETUP.md](PHASE2_SETUP.md) for deployment state and the pending SMTP sender requirement. The partner navigation now uses Brochures, omits quote/network menus and hides My leads. Mutual Funds and the ICICI/Go Digit/Tata quote cards are removed from Refer & Earn.
+
 **Phase 1 policy portal:** real email/password authentication, private policy uploads, admin approve/reject, one-time points/earning credits and a partner wallet are connected to the dedicated Sigma0Nine Supabase project. The SQL migration and production login redirects have been applied. The first admin still needs a confirmed account and an owner-assigned role. Read [PHASE1_SETUP.md](PHASE1_SETUP.md) for setup and acceptance checks.
 
 Run `npm ci`, `npm run build`, then `npm start` and open http://127.0.0.1:4173.

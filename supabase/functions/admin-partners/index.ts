@@ -1,0 +1,28 @@
+import {createClient} from 'npm:@supabase/supabase-js@2.119.2';
+const origin='https://incremint-sigma.vercel.app';
+const headers={'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS','Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin'};
+Deno.serve(async(req)=>{
+ const reply=(status:number,body:unknown)=>new Response(JSON.stringify(body),{status,headers});
+ if(req.method==='OPTIONS')return new Response('ok',{headers});
+ if(req.method!=='POST')return reply(405,{error:'Method not allowed'});
+ if(req.headers.get('origin')&&req.headers.get('origin')!==origin)return reply(403,{error:'Origin not allowed'});
+ const token=req.headers.get('authorization')||'';
+ if(!/^Bearer \S+$/.test(token))return reply(401,{error:'Sign in required'});
+ const url=Deno.env.get('SUPABASE_URL')!,anon=Deno.env.get('SUPABASE_ANON_KEY')!,secret=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+ const caller=createClient(url,anon,{global:{headers:{Authorization:token}},auth:{persistSession:false,autoRefreshToken:false}});
+ const {data:identity,error:authError}=await caller.auth.getUser(token.slice(7));
+ if(authError||!identity.user)return reply(401,{error:'Sign in again'});
+ const admin=await caller.rpc('sigma_is_admin');
+ if(admin.error||admin.data!==true)return reply(403,{error:'Admin access required'});
+ let body;try{if(Number(req.headers.get('content-length'))>4096)return reply(413,{error:'Request too large'});body=await req.json()}catch{return reply(400,{error:'Invalid request'})}
+ const email=String(body.email||'').trim().toLowerCase(),name=String(body.fullName||'').trim();
+ if(email.length>254||!/^\S+@\S+\.\S+$/.test(email)||name.length<2||name.length>100)return reply(400,{error:'Enter a valid name and email'});
+ const reserved=await caller.rpc('sigma_reserve_partner_invite',{p_email:email,p_name:name});
+ if(reserved.error)return reply(400,{error:reserved.error.message});
+ const service=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
+ const invitation=await service.auth.admin.inviteUserByEmail(email,{data:{full_name:name},redirectTo:origin+'/partner?invite=1'});
+ const updated=await service.from('sigma_partner_invites').update({status:invitation.error?'failed':'sent',user_id:invitation.data?.user?.id||null}).eq('id',reserved.data.id);
+ if(invitation.error)return reply(400,{error:invitation.error.message});
+ if(updated.error)return reply(200,{sent:true,message:'Invitation sent. Refresh the list to check its status.'});
+ return reply(200,{sent:true,message:'Invitation emailed. The partner must verify their email and choose a password.'});
+});
