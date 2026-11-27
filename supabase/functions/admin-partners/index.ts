@@ -15,6 +15,8 @@ Deno.serve(async(req)=>{
  const admin=await caller.rpc('sigma_is_admin');
  if(admin.error||admin.data!==true)return reply(403,{error:'Admin access required'});
  let body;try{if(Number(req.headers.get('content-length'))>4096)return reply(413,{error:'Request too large'});body=await req.json()}catch{return reply(400,{error:'Invalid request'})}
+ if(!body||typeof body!=='object'||Array.isArray(body))return reply(400,{error:'Invalid request'});
+ if(body.checkOnly===true)return reply(200,{authorized:true,message:'Admin invitation service connected. Email delivery still depends on your sender configuration.'});
  const email=String(body.email||'').trim().toLowerCase(),name=String(body.fullName||'').trim();
  if(email.length>254||!/^\S+@\S+\.\S+$/.test(email)||name.length<2||name.length>100)return reply(400,{error:'Enter a valid name and email'});
  const reserved=await caller.rpc('sigma_reserve_partner_invite',{p_email:email,p_name:name});
