@@ -12,5 +12,6 @@
     const admin=/^\/admin\/?$/.test(path)||!/^\/partner\/?$/.test(path)&&/^#admin(?:-|$)/.test(hash);
     return {role:admin?'admin':'partner',path:admin?'/admin':'/partner',storageKey:admin?'sigma-auth-admin-v1':'sigma-auth-v1'};
   }
-  root.PortalCore={paise,points,money,phone,uuid,validateCredit,fileExtension,validateFile,workspace};
+  function authOptions(entry,tabStore,legacyStore,makeId){if(entry.role!=='admin')return {storageKey:entry.storageKey};let tab=tabStore.getItem('sigma-admin-tab-id');if(!tab){tab=makeId();tabStore.setItem('sigma-admin-tab-id',tab)}const key='sigma-auth-admin-v2-'+tab;if(!tabStore.getItem(key)){const previous=legacyStore.getItem(entry.storageKey);if(previous){tabStore.setItem(key,previous);legacyStore.removeItem(entry.storageKey)}}return {storage:tabStore,storageKey:key}}
+  root.PortalCore={paise,points,money,phone,uuid,validateCredit,fileExtension,validateFile,workspace,authOptions};
 })(globalThis);

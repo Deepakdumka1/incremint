@@ -1,5 +1,14 @@
 # Hostinger deployment and email setup
 
+## Admin isolation and profiles — 28 November 2026
+
+- Applied migrations 007 and 008 through the owner SQL editor. The first migration's initial attempt hit a concurrent deadlock and rolled back; the retry completed successfully. No policies, earnings or partner accounts were deleted.
+- Published versioned portal/core/workspace/CSS assets and the new portal-profile.js to Hostinger. The API config and email sender were preserved.
+- Live authenticated-role checks: original administrator sees 7 partners and 4 policies; Rohit's account sees 0 partners, 0 policies and a zero summary. Local two-admin tests verify allowed own-workspace operations and denial of cross-workspace reads/uploads/reviews/credits/payments/form assignments.
+- Verified live profile editor, local photo preview, and saving unchanged personal details. No sample photo was saved to a real profile.
+- A separate browser tab opened its own sign-in form while the original admin remained signed in. Rohit's supplied password returned Invalid login credentials, so a successful second-account browser login was not claimed and no password was changed.
+- Final build and all 78 tests passed. New Google Form integrations for additional administrators are not provisioned automatically; the existing four forms remain with their original owner.
+
 ## Deployment record — 28 November 2026
 
 - Uploaded the tested static build to `sigma0nine.in` → `public_html`, including `.htaccess` and local PDF/OCR assets. Moved the uploaded ZIP outside `public_html`; retained Hostinger's original `default.php`.

@@ -4,6 +4,10 @@ A responsive insurance partner dashboard branded with the supplied Sigma0Nine lo
 
 **Current operations:** invitation-only partner onboarding, amount-only earning awards and UTR/private payment receipts are implemented. Public self-registration is disabled. See [PHASE2_SETUP.md](PHASE2_SETUP.md) for deployment state and the pending SMTP sender requirement. The partner navigation now uses Brochures, omits quote/network menus and hides My leads. Mutual Funds and the ICICI/Go Digit/Tata quote cards are removed from Refer & Earn.
 
+**Independent administrators:** apply migrations `202611280007_admin_workspaces.sql` and `202611280008_profile_photos.sql` after the earlier migrations. Each partner belongs to the inviting administrator. Policies, approvals, earnings, payment receipts, documents, invitation lists and referral settings are restricted to that administrator's workspace in PostgreSQL. Existing invitation records determine ownership; legacy accounts without a creator retain the original administrator. Existing Google Forms and their unassigned responses retain the original integration owner. Administrators use separate tab-scoped sessions, so signing in as another administrator in a new tab does not replace the first tab's account. Closing the tab ends that tab's persisted admin login.
+
+The account icon opens an editable personal profile (name, phone, address and photo). Photos are resized to JPEG locally and stored in a private, owner-only bucket; email, account role and workspace ownership cannot be edited through this form.
+
 **Phase 1 policy portal:** real email/password authentication, private policy uploads, admin approve/reject, one-time points/earning credits and a partner wallet are connected to the dedicated Sigma0Nine Supabase project. The SQL migration and production login redirects have been applied. The first admin still needs a confirmed account and an owner-assigned role. Read [PHASE1_SETUP.md](PHASE1_SETUP.md) for setup and acceptance checks.
 
 Run `npm ci`, `npm run build`, then `npm start` and open http://127.0.0.1:4173.
