@@ -42,3 +42,8 @@ The invitation email template now includes both its secure activation link and `
 - Deployed updated policy-fields.js, policy-autofill.js, portal.js, portal.css, index.html and vendor/policy-reader.mjs directly through Hostinger File Manager. Existing API configuration was preserved.
 - Checked all six owner-provided PDFs locally in the actual browser upload form: all seven non-mobile policy fields filled. All six customer mobiles were masked and remained blank. Synthetic PDF verified complete-mobile autofill and editing.
 - Live Hostinger admin upload form extracted all eight fields from a synthetic PDF. Canceled without submitting a policy. Build and all 69 tests passed. Real customer files and extracted text remain outside version control.
+
+## Partner contact fields — 28 November 2026
+
+Applied 202611280006_partner_contact.sql, deployed admin-partners with validated optional phone/address invitation metadata, and uploaded portal-admin.js plus the versioned index.html to Hostinger. Verified the live Create partner account form and Phone/Address columns. Existing accounts retain blank contact values. Build and 27 relevant endpoint/database/UI tests passed; no test invitations were emailed.
+
