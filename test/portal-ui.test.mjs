@@ -25,6 +25,7 @@ test('full authenticated partner navigation renders every business section',()=>
 });
 test('referral catalogue removes mutual funds and insurer quote cards, retaining safe client destinations',()=>{
  run("portal.view='refer';business.referral={links:{}};portalRender()");let html=node('#app').innerHTML;assert.match(html,/Commercial Vehicle/);assert.match(html,/Group Personal Accident/);assert.doesNotMatch(html,/Mutual Funds|ICICI Lombard|Go Digit|Tata AIG/);assert.match(html,/Link pending/);assert.doesNotMatch(html,/href=\"javascript:/);
+ run("business.referral={links:{term:'https://client.example/term',health:'javascript:bad()'}};portal.view='refer';portalRender()");html=node('#app').innerHTML;assert.match(html,/<a class="referral-product" href="https:\/\/client.example\/term"/);assert.doesNotMatch(html,/onclick="portalRoute\('refer-term'\)/);assert.doesNotMatch(html,/aria-label="Close navigation"/);assert.match(html,/disabled aria-label="Health — Link pending"/);
  run("portal.view='refer-term';business.referral={links:{term:'https://client.example/term','term-quote':'javascript:bad()'}};portalRender()");html=node('#app').innerHTML;assert.match(html,/https:\/\/client.example\/term/);assert.match(html,/noopener noreferrer/);assert.doesNotMatch(html,/javascript:bad/);compileHandlers(html);
 });
 
