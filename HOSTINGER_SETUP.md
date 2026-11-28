@@ -1,5 +1,12 @@
 # Hostinger deployment and email setup
 
+## Invitation function repair — 28 November 2026
+
+- Reproduced the live main-domain invitation health-check failure. Browser network diagnostics showed OPTIONS returning HTTP 503 with `sb-error-code: BOOT_ERROR`.
+- Inspected the deployed editor source: the current contact-enabled handler was followed by an older second copy, including duplicate imports/constants and a second `Deno.serve`. Replaced the deployed source with the single current handler matching the repository; verified the editor contents before deploying.
+- Redeployed `admin-partners` and verified the authenticated main-domain health check now displays “Admin invitation service connected.” Authentication, administrator role checks, exact trusted origins and partner workspace reservation remain enabled.
+- No new account was created and no real invitation email was sent during this repair. The email shown in the owner's screenshot already exists in the administrator's partner list. Inbox delivery remains distinct from the verified endpoint repair.
+
 ## Main domain verification — 28 November 2026
 
 - `https://sigma0nine.in/` now opens the deployed partner sign-in at `/partner` over HTTPS without a certificate warning. `/admin` also works; an existing administrator signed in successfully and loaded the real policy and earnings records.
