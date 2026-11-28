@@ -1,5 +1,14 @@
 # Hostinger deployment and email setup
 
+## Partner memberships and removal — 28 November 2026
+
+- Applied migration 009 and deployed the matching `admin-partners` function. A verified partner identity can now join multiple administrator workspaces using the same login; each workspace has its own name/contact record and its own invitation uniqueness constraint. Existing partners are linked without sending a misleading new-account activation email. New identities still receive the normal invitation.
+- Policies and ledger entries now retain their administrator ID. Row policies, private documents, review/credit/payment RPCs and summaries use the policy's workspace rather than granting access to every policy owned by a shared partner. Existing records were backfilled to their original administrator.
+- Removal deactivates only the calling administrator's membership. It preserves authentication, other memberships and historical policies, earnings and receipts. New uploads to an inactive membership are rejected; adding the email again can reactivate the membership.
+- Published seven versioned frontend assets including `portal-memberships.js`. Partners can select an administrator workspace per browser tab; policy/earnings/enquiry queries and referral destinations use that selection. Administrators see only active partners in their list, upload picker and enquiry assignment picker.
+- Live verification: Remove confirmation opens and cancels correctly, same-workspace duplicate returns “This partner already exists in your workspace”, invitation health check succeeds, and the original administrator still sees four policies and four credits. No real partner was removed/linked and no invitation email was sent during these checks.
+- Build and all 87 tests passed, including database tests for one partner shared by two admins, private cross-workspace policy/file/payment denial, removal, reactivation and workspace selection. Google Forms' separate mismatched sync credential remains pending the owner's manual key update.
+
 ## Invitation function repair — 28 November 2026
 
 - Reproduced the live main-domain invitation health-check failure. Browser network diagnostics showed OPTIONS returning HTTP 503 with `sb-error-code: BOOT_ERROR`.

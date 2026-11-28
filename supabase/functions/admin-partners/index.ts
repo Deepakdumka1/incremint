@@ -28,9 +28,17 @@ Deno.serve(async(req)=>{
  const reserved=await caller.rpc('sigma_reserve_partner_invite',{p_email:email,p_name:name});
  if(reserved.error)return reply(400,{error:reserved.error.message});
  const service=createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
+ if(reserved.data.user_id){
+  const linked=await caller.rpc('sigma_complete_partner_invite',{p_invite:reserved.data.id,p_phone:phone,p_address:address});
+  if(linked.error)return reply(400,{error:linked.error.message});
+  await service.from('sigma_partner_invites').update({status:'linked'}).eq('id',reserved.data.id);
+  return reply(200,{sent:false,linked:true,message:'Partner added to your workspace. They use their existing email and password and select your workspace. Other administrators’ records remain private.'});
+ }
  const invitation=await service.auth.admin.inviteUserByEmail(email,{data:{full_name:name,phone,address},redirectTo:origin+'/partner?invite=1'});
  const updated=await service.from('sigma_partner_invites').update({status:invitation.error?'failed':'sent',user_id:invitation.data?.user?.id||null}).eq('id',reserved.data.id);
  if(invitation.error)return reply(400,{error:invitation.error.message});
+ const membership=await caller.rpc('sigma_complete_partner_invite',{p_invite:reserved.data.id,p_phone:phone,p_address:address});
+ if(membership.error)return reply(400,{error:'Account invited, but workspace linking needs a retry: '+membership.error.message});
  if(updated.error)return reply(200,{sent:true,message:'Invitation sent. Refresh the list to check its status.'});
  return reply(200,{sent:true,message:'Invitation emailed. The partner must verify their email and choose a password.'});
 });

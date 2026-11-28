@@ -3,10 +3,10 @@ const formInbox={owner:null,rows:[],partners:[],error:'',limit:100};
 async function portalLoadEnquiries(){
  const owner=portal.user?.id;if(!owner)return;
  if(formInbox.owner!==owner){formInbox.owner=owner;formInbox.rows=[];formInbox.partners=[];formInbox.limit=100}
- const result=await portal.client.from('sigma_form_enquiries').select('*').order('submitted_at',{ascending:false}).range(0,formInbox.limit);
+ const result=await portal.client.from('sigma_form_enquiries').select('*').eq('admin_id',portalModeAdmin()?portal.user.id:portal.workspaceAdmin).order('submitted_at',{ascending:false}).range(0,formInbox.limit);
  if(portal.user?.id!==owner)return;
  formInbox.error=result.error?portalError(result.error):'';formInbox.rows=result.error?[]:result.data||[];
- if(portalModeAdmin()){const profiles=await portal.client.from('sigma_profiles').select('id,full_name,email').eq('role','partner').order('full_name');if(portal.user?.id===owner){formInbox.partners=profiles.data||[];if(profiles.error)formInbox.error=portalError(profiles.error)}}
+ if(portalModeAdmin()){const profiles=await portal.client.rpc('sigma_list_partners',{p_limit:1000});if(portal.user?.id===owner){formInbox.partners=profiles.data||[];if(profiles.error)formInbox.error=portalError(profiles.error)}}
 }
 function portalEnquiriesPage(){
  if(formInbox.owner!==portal.user?.id){formInbox.rows=[];formInbox.partners=[];formInbox.error='';queueMicrotask(()=>portalLoadEnquiries().then(portalRender))}
