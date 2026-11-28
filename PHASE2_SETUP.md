@@ -40,3 +40,13 @@ Four Google Forms were created in the owner's ddumka102@gmail.com account and pu
 - Term Offline: https://docs.google.com/forms/d/e/1FAIpQLSdTXy4z-0yIQIxhuqT7fZzaf2EUebgcYgoH4ZYee8K4ZxTcQA/viewform
 
 All nine destinations were saved and their settings values matched against the supplied/published URLs. Forms use an enquiry structure based on the available reference workflow. Marine/Workmen options did not open in the signed-in reference catalogue, so exact original parity is unverified. Responses remain in Google Forms; there is no automated Forms-to-Supabase ingestion. Form edit access was not shared publicly.
+
+### Google Forms dashboard sync
+
+- Migration `202611280005_forms_sync.sql` adds a private enquiry inbox, admin-only partner assignment, hashed webhook-key configuration and `(form_id,response_id)` deduplication.
+- Deploy `supabase/functions/forms-sync/index.ts` as `forms-sync`, with legacy JWT verification **enabled**. The function accepts only the four configured Forms and a matching `x-sigma-sync-key`.
+- Apps Script source: `integrations/google-forms-sync.gs` (downloadable from admin → Form enquiries → Connect Google Forms). Google project: https://script.google.com/home/projects/1Ym3uhHBuihV8ob2aYfyn55bDCcSO8azirjcok-Da2cYpFTfJZuvTGzhO/edit
+- In the private form owner's Apps Script project, set `SIGMA_SYNC_KEY` and the public legacy `SUPABASE_ANON_KEY` in Script Properties. Generate the former from the admin setup dialog; only its SHA-256 hash is stored by Supabase. Never put the service role key in Apps Script or frontend code.
+- Run `sigmaInstall` once and authorize the Forms/external-request/trigger scopes. It installs one submit trigger per form, a five-minute retry/backfill trigger and imports existing responses. Installation is idempotent. Keep the script private; no web-app deployment is needed.
+- Before Google authorization and successful installation, sync is **not active**. Inspect Apps Script Executions for successful `sigmaInstall` / `sigmaSweep` runs; failures do not log response data.
+- Submitted partner emails are self-reported and do not grant account access. Admin confirms an existing partner in Form enquiries; RLS then permits that partner to see the answers. Polling refreshes this page every 20 seconds. Form submissions cannot create approved policies, earnings or payments.

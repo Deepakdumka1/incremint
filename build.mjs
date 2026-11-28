@@ -10,5 +10,6 @@ await mkdir('dist/vendor/ocr/lang',{recursive:true});
 await cp('node_modules/tesseract.js/dist/worker.min.js','dist/vendor/ocr/worker.min.js');
 await cp('node_modules/tesseract.js-core','dist/vendor/ocr/core',{recursive:true});
 await cp('node_modules/@tesseract.js-data/eng/4.0.0/eng.traineddata.gz','dist/vendor/ocr/lang/eng.traineddata.gz');
+await cp('integrations/google-forms-sync.gs','dist/google-forms-sync.gs');
 for(const [source,target] of [['node_modules/pdfjs-dist/LICENSE','dist/vendor/pdfjs/LICENSE'],['node_modules/tesseract.js/LICENSE','dist/vendor/ocr/LICENSE'],['node_modules/@tesseract.js-data/eng/LICENSE','dist/vendor/ocr/lang/LICENSE']]){try{await cp(source,target)}catch(e){if(e.code!=='ENOENT')throw e}}
 console.log('Prepared same-origin PDF and OCR runtime assets.');
