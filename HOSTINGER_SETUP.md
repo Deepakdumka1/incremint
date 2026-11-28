@@ -1,5 +1,11 @@
 # Hostinger deployment and email setup
 
+## Main domain verification — 28 November 2026
+
+- `https://sigma0nine.in/` now opens the deployed partner sign-in at `/partner` over HTTPS without a certificate warning. `/admin` also works; an existing administrator signed in successfully and loaded the real policy and earnings records.
+- Main-domain admin and partner tabs were kept open for the owner. No DNS records or nameservers were changed in this verification; the owner's domain connection was already serving the Hostinger deployment.
+- Exact main-domain authentication redirects and the trusted invitation origin were configured previously. The Supabase URL Configuration page repeatedly timed out during this check, so the default Site URL change from Vercel to `https://sigma0nine.in` remains unverified and must not be reported as completed. Email delivery and activation still need an end-to-end inbox check.
+
 ## Admin isolation and profiles — 28 November 2026
 
 - Applied migrations 007 and 008 through the owner SQL editor. The first migration's initial attempt hit a concurrent deadlock and rolled back; the retry completed successfully. No policies, earnings or partner accounts were deleted.
@@ -16,7 +22,7 @@
 - Added exact `/admin`, `/partner` and `/partner?invite=1` Auth redirect URLs for the temporary host, `sigma0nine.in` and `www.sigma0nine.in`. The prior Vercel redirect remains available during cutover.
 - Deployed the updated `admin-partners` function with the four exact trusted HTTPS origins; legacy JWT verification remains enabled.
 - SMTP settings were saved through the owner's Supabase UI with Hostinger's SMTP host and port 465. No password was copied into this repository. Saved the `sign-in.html` template from `integrations/email`, enabled `emailOtpEnabled` in the deployed Hostinger config, and successfully requested a sign-in code for the owner's existing verified email. Inbox receipt/code verification is still to be confirmed.
-- The domain still needs its GoDaddy DNS connected. Hostinger reports `A @ → 145.79.211.35` and `CNAME www → sigma0nine.in`, TTL 300. This preserves the current DNS provider. No domain records were changed or nameservers marked complete. HTTPS on the main domain failed while DNS/SSL setup was incomplete; no certificate warning was bypassed.
+- At the initial deployment, the domain needed its GoDaddy DNS connected and HTTPS failed. Hostinger reported `A @ → 145.79.211.35` and `CNAME www → sigma0nine.in`, TTL 300. The later main-domain verification above supersedes that pending status; no certificate warning was bypassed.
 - Hostinger offers MySQL for this site; no database exists there yet. **Private policy files, users, earnings and Google Form enquiries still use Supabase.** A backend/data migration has not been performed.
 
 This repository supports Hostinger Apache/LiteSpeed static hosting. The dashboard currently uses Supabase for authentication, PostgreSQL/RLS, private policy storage and Edge Functions. Uploading the frontend does **not** migrate those services or their private data.
