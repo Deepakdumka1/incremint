@@ -8,5 +8,5 @@ export default function handler(req,res){
   const keyRole=(()=>{try{return JSON.parse(Buffer.from(key.split('.')[1],'base64url').toString()).role}catch{return ''}})();
   const publicKey=key.startsWith('sb_publishable_')||keyRole==='anon';
   if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url)||!publicKey||key.startsWith('sb_secret_')||keyRole==='service_role')return res.status(200).json({configured:false});
-  return res.status(200).json({configured:true,url,publishableKey:key});
+  return res.status(200).json({configured:true,url,publishableKey:key,emailOtpEnabled:process.env.EMAIL_OTP_ENABLED==='true'});
 }
