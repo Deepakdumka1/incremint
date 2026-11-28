@@ -36,3 +36,9 @@ First confirm the plan supports the required server, PostgreSQL, background jobs
 ### Email activation verification
 
 The invitation email template now includes both its secure activation link and `{{ .Token }}`. The deployed admin's **Check invitation service** returned “Admin invitation service connected” on the Hostinger temporary domain. The sign-in code request returned success and opened the code-entry form for `ddumka102@gmail.com`; inbox receipt and code verification remain outstanding. Hostinger's outgoing email log had not populated when checked. The active mailbox plan shown in hPanel is a free trial ending 28 December 2026.
+
+## Document autofill update — 28 November 2026
+
+- Deployed updated policy-fields.js, policy-autofill.js, portal.js, portal.css, index.html and vendor/policy-reader.mjs directly through Hostinger File Manager. Existing API configuration was preserved.
+- Checked all six owner-provided PDFs locally in the actual browser upload form: all seven non-mobile policy fields filled. All six customer mobiles were masked and remained blank. Synthetic PDF verified complete-mobile autofill and editing.
+- Live Hostinger admin upload form extracted all eight fields from a synthetic PDF. Canceled without submitting a policy. Build and all 69 tests passed. Real customer files and extracted text remain outside version control.
