@@ -1,11 +1,13 @@
 import {createClient} from 'npm:@supabase/supabase-js@2.119.2';
-const origin='https://incremint-sigma.vercel.app';
-const headers={'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS','Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin'};
+const canonicalOrigin='https://sigma0nine.in';
+const trustedOrigins=new Set([canonicalOrigin,'https://www.sigma0nine.in','https://first-mediumpurple-kangaroo-62.hostingersite.com','https://incremint-sigma.vercel.app']);
 Deno.serve(async(req)=>{
+ const requestedOrigin=req.headers.get('origin')||'',origin=trustedOrigins.has(requestedOrigin)?requestedOrigin:canonicalOrigin;
+ const headers={'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS','Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin'};
  const reply=(status:number,body:unknown)=>new Response(JSON.stringify(body),{status,headers});
+ if(requestedOrigin&&!trustedOrigins.has(requestedOrigin))return reply(403,{error:'Origin not allowed'});
  if(req.method==='OPTIONS')return new Response('ok',{headers});
  if(req.method!=='POST')return reply(405,{error:'Method not allowed'});
- if(req.headers.get('origin')&&req.headers.get('origin')!==origin)return reply(403,{error:'Origin not allowed'});
  const token=req.headers.get('authorization')||'';
  if(!/^Bearer \S+$/.test(token))return reply(401,{error:'Sign in required'});
  const url=Deno.env.get('SUPABASE_URL')!,anon=Deno.env.get('SUPABASE_ANON_KEY')!,secret=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
